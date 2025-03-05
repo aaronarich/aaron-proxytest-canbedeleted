@@ -1,4 +1,4 @@
 [[redirects]]
   from = "/*"
-  to = "/netlify/edge-functions/proxy"
+  to = "/netlify/functions/proxy"
   status = 200
