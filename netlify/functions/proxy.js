@@ -10,7 +10,7 @@ export async function handler(event) {
         method: httpMethod,
         headers: {
           ...headers,
-          host: 'track.customer.io', // Ensure correct Host header
+          host: 'netlify-proxy.aarich.dev', // Ensure correct Host header
         },
         body: httpMethod !== 'GET' && httpMethod !== 'HEAD' ? body : undefined,
       });
