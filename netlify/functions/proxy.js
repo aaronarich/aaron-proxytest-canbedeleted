@@ -3,18 +3,19 @@ export default async (request, context) => {
   const targetUrl = `https://track.customer.io${url.pathname}${url.search}`;
 
   const headers = new Headers(request.headers);
-  
-  // Ensure the correct host is set
+
+  // 🔹 Set the correct Host header so Customer.io validates the request correctly
   headers.set("Host", "track.customer.io");
 
-  // Explicitly set headers to preserve them
+  // 🔹 Ensure all security-sensitive headers are passed correctly
   headers.set("User-Agent", request.headers.get("User-Agent") || "Mozilla/5.0");
-  headers.set("Accept", request.headers.get("Accept") || "*/*");
   headers.set("Referer", request.headers.get("Referer") || "");
-  headers.set("Cookie", request.headers.get("Cookie") || "");
-  headers.set("Authorization", request.headers.get("Authorization") || "");
-  headers.set("Accept-Encoding", request.headers.get("Accept-Encoding") || "gzip, deflate, br");
-  headers.set("Accept-Language", request.headers.get("Accept-Language") || "en-US,en;q=0.9");
+  headers.set("Cookie", request.headers.get("Cookie") || ""); // If authentication relies on cookies
+  headers.set("Authorization", request.headers.get("Authorization") || ""); // If tokens are used
+  headers.set("Accept", request.headers.get("Accept") || "*/*");
+
+  console.log("Forwarding request to:", targetUrl);
+  console.log("Forwarded Headers:", Object.fromEntries(headers.entries()));
 
   try {
     const response = await fetch(targetUrl, {
@@ -23,15 +24,9 @@ export default async (request, context) => {
       body: request.method !== "GET" && request.method !== "HEAD" ? request.body : undefined,
     });
 
-    // Convert response headers to a modifiable object
-    const responseHeaders = new Headers(response.headers);
-
-    // Set cache headers
-    responseHeaders.set("Cache-Control", "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400");
-
     return new Response(response.body, {
       status: response.status,
-      headers: responseHeaders,
+      headers: response.headers,
     });
   } catch (error) {
     return new Response(`Proxy error: ${error.message}`, { status: 500 });
